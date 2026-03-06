@@ -2,16 +2,16 @@
 
 # VAce QuizMaster
 
-**A full-stack quiz management platform built with Flask, PostgreSQL, and deployed on Vercel.**
+**A full-stack quiz management platform built with Flask, SQLite, and deployed on Vercel.**
 
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0.3-000000?style=flat-square&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
+[![SQLite](https://img.shields.io/badge/DB-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://sqlite.org)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://vishal-mad1.vercel.app)
 [![Tests](https://img.shields.io/badge/Tests-42%20passing-22c55e?style=flat-square&logo=pytest&logoColor=white)](#testing)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-[Live Demo](https://vishal-mad1.vercel.app) · [Report a Bug](https://github.com/Vish2BDev/quizmaster-v2/issues) · [Request a Feature](https://github.com/Vish2BDev/quizmaster-v2/issues)
+[🚀 Live Demo](https://vishal-mad1.vercel.app) · [Report a Bug](https://github.com/Vish2BDev/VAce_Quiz_App-V1/issues) · [Request a Feature](https://github.com/Vish2BDev/VAce_Quiz_App-V1/issues)
 
 </div>
 
@@ -117,8 +117,8 @@ User ──────────────────── Score
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Vish2BDev/quizmaster-v2.git
-cd quizmaster-v2
+git clone https://github.com/Vish2BDev/VAce_Quiz_App-V1.git
+cd VAce_Quiz_App-V1
 
 # 2. Create and activate a virtual environment
 python -m venv venv
@@ -272,5 +272,5 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 ---
 
 <div align="center">
-Built by <a href="https://github.com/Vish2BDev">Vishal Bhandari</a> · MAD 1 Project · 2026
+Built by <a href="https://github.com/Vish2BDev">Vishal Bhandari</a> · MAD 1 Project · 2025
 </div>
