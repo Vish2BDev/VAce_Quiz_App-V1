@@ -31,20 +31,25 @@ def create_app():
     app.config['SECRET_KEY'] = secret
 
     # Build the database URI — fix legacy 'postgres://' scheme from Heroku/Supabase
+    # Use pg8000 dialect (pure Python, works on all serverless runtimes)
     database_url = os.environ.get('DATABASE_URL') or ('sqlite:///' + DB_PATH)
     if database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        database_url = database_url.replace('postgres://', 'postgresql+pg8000://', 1)
+    elif database_url.startswith('postgresql://') and 'supabase' in database_url:
+        database_url = database_url.replace('postgresql://', 'postgresql+pg8000://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour token expiry
 
     # Serverless connection pooling — use NullPool on Vercel to prevent
-    # connection exhaustion (each Lambda invocation gets its own connection)
+    # connection exhaustion (each Lambda invocation gets its own connection).
+    # connect_timeout prevents pg8000 from hanging indefinitely if the
+    # Supabase free-tier instance is paused / slow to accept connections.
     if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('VERCEL'):
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'poolclass': NullPool,
-            'connect_args': {'sslmode': 'require'} if 'supabase' in database_url else {},
+            'connect_args': {'timeout': 8},
         }
 
     db.init_app(app)
@@ -54,8 +59,10 @@ def create_app():
 
 app = create_app()
 
-# Import routes (controllers) — must come AFTER app is created and context pushed
-from controllers.controllers import *  # noqa: E402, F401, F403
+# Import controllers as a side-effect to register routes and error handlers.
+# Do NOT use `from controllers.controllers import *` — that would overwrite `app`
+# with controllers.py's module-level `app = current_app` alias.
+import controllers.controllers  # noqa: F401
 
 if __name__ == '__main__':
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
