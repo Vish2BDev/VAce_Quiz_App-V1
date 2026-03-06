@@ -26,6 +26,28 @@
                 </div>
             </div>
         </div>
+
+        {# ── Demo credentials card ── #}
+        <div class="card border-warning mt-3 shadow-sm">
+            <div class="card-body py-3 px-4">
+                <h6 class="card-title text-warning mb-2"><i class="bi bi-stars"></i> Demo Credentials</h6>
+                <div class="d-flex gap-3 flex-wrap">
+                    <div>
+                        <span class="badge bg-danger me-1">Admin</span>
+                        <code>admin</code> / <code>admin123</code>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary me-1">User</span>
+                        <code>register</code> to create one
+                    </div>
+                </div>
+                <p class="text-muted mb-0 mt-2" style="font-size:0.78rem;">
+                    <i class="bi bi-info-circle"></i>
+                    This is a live demo. Data may be reset periodically.
+                    First login after inactivity may take a few seconds (DB cold-start).
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

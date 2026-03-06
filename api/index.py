@@ -19,7 +19,12 @@ try:
 
     @app.before_request
     def _lazy_init_db():
-        """Create tables and seed admin on first request (lazy cold-start init)."""
+        """Create tables and seed admin on first request.
+        If the DB is unreachable (e.g. Supabase free-tier waking up) we just
+        log the error and let the request proceed — route handlers have their
+        own try/except so they'll show a friendly message instead of a 500.
+        We keep retrying on each request until init succeeds.
+        """
         global _db_initialized
         if not _db_initialized:
             try:
@@ -28,7 +33,7 @@ try:
                 _db_initialized = True
                 _logger.info('DB initialised on first request.')
             except Exception as e:
-                _logger.error('DB init failed: %s', e, exc_info=True)
+                _logger.error('DB init failed (will retry next request): %s', e)
 
 except Exception:
     _startup_error = traceback.format_exc()

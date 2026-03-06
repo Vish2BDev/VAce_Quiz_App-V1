@@ -114,7 +114,12 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
+        try:
+            user = User.query.filter_by(username=username).first()
+        except Exception as e:
+            logger.error('DB error during login for user %r: %s', username, e, exc_info=True)
+            flash('The database is temporarily unavailable. Please wait a moment and try again.', 'warning')
+            return render_template('auth/login.html')
 
         if user and user.check_password(password):
             login_user(user)
@@ -171,7 +176,13 @@ def register():
                 flash('Invalid date format for DOB. Use YYYY-MM-DD.', 'warning')
                 return render_template('auth/register.html', username=username, full_name=full_name, qualification=qualification, dob=dob_str)
 
-        existing_user = User.query.filter(func.lower(User.username) == func.lower(username)).first()
+        existing_user = None
+        try:
+            existing_user = User.query.filter(func.lower(User.username) == func.lower(username)).first()
+        except Exception as e:
+            logger.error('DB error during register lookup: %s', e, exc_info=True)
+            flash('The database is temporarily unavailable. Please wait a moment and try again.', 'warning')
+            return render_template('auth/register.html', username=username, full_name=full_name, qualification=qualification, dob=dob_str)
         if existing_user:
             flash('Username already taken. Please choose another.', 'warning')
             return render_template('auth/register.html', username=username, full_name=full_name, qualification=qualification, dob=dob_str)
