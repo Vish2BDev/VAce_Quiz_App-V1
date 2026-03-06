@@ -13,27 +13,34 @@ _startup_error = None
 try:
     from app import app
     from models.database import db
-    from controllers.controllers import create_update_default_admin
 
     _db_initialized = False
 
     @app.before_request
     def _lazy_init_db():
-        """Create tables and seed admin on first request.
-        If the DB is unreachable (e.g. Supabase free-tier waking up) we just
-        log the error and let the request proceed — route handlers have their
-        own try/except so they'll show a friendly message instead of a 500.
-        We keep retrying on each request until init succeeds.
+        """Create tables + seed demo accounts on first request.
+        Uses SQLite in /tmp — always available, no external DB needed.
         """
         global _db_initialized
         if not _db_initialized:
-            try:
-                db.create_all()
-                create_update_default_admin()
-                _db_initialized = True
-                _logger.info('DB initialised on first request.')
-            except Exception as e:
-                _logger.error('DB init failed (will retry next request): %s', e)
+            db.create_all()
+            _seed_demo_data()
+            _db_initialized = True
+            _logger.info('DB initialised and demo data seeded.')
+
+    def _seed_demo_data():
+        from models.models import User
+        accounts = [
+            {'username': 'admin',      'full_name': 'VAce Admin',      'password': 'admin123',  'role': 'admin'},
+            {'username': 'demo',       'full_name': 'Demo Student',    'password': 'demo1234',  'role': 'user'},
+            {'username': 'student1',   'full_name': 'Alice Johnson',   'password': 'student123','role': 'user'},
+        ]
+        for acc in accounts:
+            if not User.query.filter_by(username=acc['username']).first():
+                u = User(username=acc['username'], full_name=acc['full_name'], role=acc['role'])
+                u.set_password(acc['password'])
+                db.session.add(u)
+        db.session.commit()
 
 except Exception:
     _startup_error = traceback.format_exc()

@@ -2,7 +2,6 @@ import os
 import logging
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
-from sqlalchemy.pool import NullPool
 from models.database import db
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -30,27 +29,21 @@ def create_app():
 
     app.config['SECRET_KEY'] = secret
 
-    # Build the database URI — fix legacy 'postgres://' scheme from Heroku/Supabase
-    # Use pg8000 dialect (pure Python, works on all serverless runtimes)
-    database_url = os.environ.get('DATABASE_URL') or ('sqlite:///' + DB_PATH)
-    if database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql+pg8000://', 1)
-    elif database_url.startswith('postgresql://') and 'supabase' in database_url:
-        database_url = database_url.replace('postgresql://', 'postgresql+pg8000://', 1)
+    # On Vercel: use SQLite in /tmp (always writable, no external DB needed for demo).
+    # Local dev: use DATABASE_URL or a local file.
+    if os.environ.get('VERCEL'):
+        database_url = 'sqlite:////tmp/quiz_master.db'
+    else:
+        database_url = os.environ.get('DATABASE_URL') or ('sqlite:///' + DB_PATH)
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql+pg8000://', 1)
+        elif database_url.startswith('postgresql://'):
+            database_url = database_url.replace('postgresql://', 'postgresql+pg8000://', 1)
+
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour token expiry
-
-    # Serverless connection pooling — use NullPool on Vercel to prevent
-    # connection exhaustion (each Lambda invocation gets its own connection).
-    # connect_timeout prevents pg8000 from hanging indefinitely if the
-    # Supabase free-tier instance is paused / slow to accept connections.
-    if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('VERCEL'):
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'poolclass': NullPool,
-            'connect_args': {'timeout': 8},
-        }
 
     db.init_app(app)
     csrf.init_app(app)

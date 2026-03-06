@@ -6,4 +6,3 @@ Werkzeug==3.0.3
 SQLAlchemy==2.0.31
 WTForms==3.1.2
 gunicorn==22.0.0
-pg8000==1.31.2
