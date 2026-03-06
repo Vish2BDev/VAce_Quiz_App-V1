@@ -1,0 +1,80 @@
+{% extends "base.html" %} {# Assumes base.html exists #}
+{% block title %}Add New Quiz{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-clipboard2-plus-fill"></i> Add New Quiz</h1>
+
+{# Check if chapters are available to associate the quiz with #}
+{% if chapters %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {# Form posts to the admin_create_quiz route #}
+            <form method="POST" action="{{ url_for('admin_create_quiz') }}">
+
+                {# Chapter Selection Dropdown #}
+                <div class="mb-3">
+                    <label for="chapter_id" class="form-label">Chapter <span class="text-danger">*</span></label>
+                    <select class="form-select" id="chapter_id" name="chapter_id" required>
+                        <option value="">-- Select Chapter --</option>
+                        {# Group chapters by subject for better organization #}
+                        {% set submitted_chapter_id = request.form.get('chapter_id') %} {# Get submitted value for repopulation #}
+                        {% for subject in chapters | map(attribute='subject') | unique | sort(attribute='name') %}
+                            <optgroup label="{{ subject.name }}">
+                                {% for chapter in chapters | selectattr('subject_id', 'equalto', subject.id) | sort(attribute='name') %}
+                                    <option value="{{ chapter.id }}"
+                                            {# Pre-select based on submitted value if form is re-rendered on error #}
+                                            {% if (submitted_chapter_id and chapter.id == (submitted_chapter_id | int(0))) %}selected{% endif %}>
+                                        {{ chapter.name }}
+                                    </option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Quiz Name Input #}
+                <div class="mb-3">
+                    <label for="quiz_name" class="form-label">Quiz Name <span class="text-danger">*</span></label>
+                     {# Retain value if passed back on error #}
+                    <input type="text" class="form-control" id="quiz_name" name="quiz_name" value="{{ quiz_name or request.form.quiz_name or '' }}" required>
+                </div>
+
+                {# Date and Duration Inputs in a Row #}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="date_of_quiz" class="form-label">Date of Quiz <span class="text-danger">*</span></label>
+                         {# Retain value, default to today if not provided #}
+                        <input type="date" class="form-control" id="date_of_quiz" name="date_of_quiz" value="{{ date_of_quiz or request.form.date_of_quiz or today_date }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                         <label for="time_duration" class="form-label">Time Duration (MM:SS) <span class="text-danger">*</span></label>
+                         {# Use text input with pattern validation hint #}
+                         <input type="text" class="form-control" id="time_duration" name="time_duration" placeholder="e.g., 30:00" pattern="\d{2}:\d{2}" value="{{ time_duration or request.form.time_duration or '' }}" required>
+                         <div class="form-text">Enter duration in minutes:seconds (e.g., 15:30).</div>
+                     </div>
+                </div>
+
+                {# Remarks Input #}
+                <div class="mb-3">
+                    <label for="remarks" class="form-label">Remarks (Optional)</label>
+                     {# Retain value if passed back on error #}
+                    <textarea class="form-control" id="remarks" name="remarks" rows="2">{{ remarks or request.form.remarks or '' }}</textarea>
+                </div>
+
+                <hr> {# Separator #}
+
+                {# Action Buttons #}
+                <a href="{{ url_for('quizzes_list') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Create Quiz</button>
+            </form>
+        </div> {# End card-body #}
+    </div> {# End card #}
+{% else %}
+    {# Show a warning if no chapters exist #}
+    <div class="alert alert-warning mt-3" role="alert">
+        No chapters found. You must <a href="{{ url_for('admin_create_chapter') }}">create a chapter</a> before adding quizzes.
+    </div>
+    <a href="{{ url_for('quizzes_list') }}" class="btn btn-outline-secondary mt-3"><i class="bi bi-arrow-left"></i> Back to Quizzes List</a>
+{% endif %} {# End chapter check #}
+
+{% endblock %} {# End content #}

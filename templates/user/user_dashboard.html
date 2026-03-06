@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-house-door-fill"></i> Welcome, {{ current_user.full_name }}!</h1>
+<hr>
+
+<h2 class="mb-3">Available Quizzes</h2>
+{% if quizzes %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for quiz in quizzes %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ quiz.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ quiz.chapter.name }} ({{ quiz.chapter.subject.name }})</h6>
+                    <p class="card-text">
+                        <small>Date: {{ quiz.date_of_quiz.strftime('%d %b %Y') }} | Duration: {{ quiz.time_duration }} mins | Questions: {{ quiz.questions|length }}</small><br>
+                        {{ quiz.remarks | truncate(100) if quiz.remarks }}
+                    </p>
+                     {# Check if user already attempted this quiz (full history, not just last 5) #}
+                     {% if quiz.id in attempted_quiz_ids %}
+                         <div class="alert alert-secondary alert-sm py-1 px-2 mb-2" role="alert">
+                             Previously attempted<br>
+                             {# Score shown only if within the recent 5 fetched #}
+                             {% set recent_attempt = past_scores|selectattr('quiz_id', 'equalto', quiz.id)|first %}
+                             {% if recent_attempt %}Score: <strong>{{ recent_attempt.total_scored }} / {{ recent_attempt.total_possible }}</strong>{% endif %}
+                         </div>
+                          <a href="{{ url_for('attempt_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-outline-secondary w-100"><i class="bi bi-arrow-clockwise"></i> Re-attempt Quiz</a>
+                     {% else %}
+                         <a href="{{ url_for('attempt_quiz', quiz_id=quiz.id) }}" class="btn btn-success w-100"><i class="bi bi-play-circle-fill"></i> Start Quiz</a>
+                     {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">No quizzes are available at the moment. Please check back later.</div>
+{% endif %}
+
+<hr class="my-5">
+
+<h2 class="mb-3">Recent Attempts</h2>
+{% if past_scores %}
+ <div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Quiz Name</th>
+                    <th>Score</th>
+                    <th>Date Attempted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in past_scores %}
+                <tr>
+                    <td>{{ score.quiz.name }}</td>
+                    <td><strong>{{ score.total_scored }} / {{ score.total_possible }}</strong></td>
+                    <td>{{ score.time_stamp_of_attempt.strftime('%d %b %Y, %I:%M %p') }}</td>
+                 </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-center">
+         <a href="{{ url_for('quiz_history') }}">View Full History <i class="bi bi-arrow-right"></i></a>
+    </div>
+</div>
+{% else %}
+    <div class="alert alert-light">You haven't attempted any quizzes yet.</div>
+{% endif %}
+
+{% endblock %}

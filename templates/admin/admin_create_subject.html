@@ -1,0 +1,42 @@
+{% extends "base.html" %} {# Make sure you have a base.html template #}
+{% block title %}Add New Subject{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-journal-plus"></i> Add New Subject</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {# Ensure the form POSTs to the route handling subject creation #}
+        {# This assumes you have a route named 'admin_create_subject' handling GET and POST #}
+         <form method="POST" action="{{ url_for('admin_create_subject') }}">
+            <div class="mb-3">
+                <label for="name" class="form-label">Subject Name <span class="text-danger">*</span></label>
+                {# Retain value if passed back on validation error #}
+                <input type="text"
+                       class="form-control"
+                       id="name"
+                       name="name"
+                       value="{{ subject_name or request.form.name or '' }}"
+                       required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description (Optional)</label>
+                {# Retain value if passed back on validation error #}
+                <textarea class="form-control"
+                          id="description"
+                          name="description"
+                          rows="3">{{ description or request.form.description or '' }}</textarea>
+            </div>
+            <hr>
+            {# Cancel button links back to the list view #}
+            <a href="{{ url_for('subjects_list') }}" class="btn btn-secondary">
+                <i class="bi bi-x-lg"></i> Cancel
+            </a>
+            {# Submit button #}
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg"></i> Create Subject
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

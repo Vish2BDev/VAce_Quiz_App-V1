@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Edit Quiz{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-pencil-square"></i> Edit Quiz: {{ quiz.name }}</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+         <form method="POST" action="{{ url_for('quiz_edit', quiz_id=quiz.id) }}">
+             <div class="mb-3">
+                 <label for="chapter_id" class="form-label">Chapter <span class="text-danger">*</span></label>
+                 <select class="form-select" id="chapter_id" name="chapter_id" required>
+                     <option value="">-- Select Chapter --</option>
+                     {# Group by subject for better UX #}
+                     {% for subject in chapters | map(attribute='subject') | unique | sort(attribute='name') %}
+                         <optgroup label="{{ subject.name }}">
+                             {% for chapter in chapters | selectattr('subject_id', 'equalto', subject.id) | sort(attribute='name') %}
+                                 <option value="{{ chapter.id }}" {% if chapter.id == quiz.chapter_id %}selected{% endif %}>{{ chapter.name }}</option>
+                             {% endfor %}
+                         </optgroup>
+                     {% endfor %}
+                 </select>
+             </div>
+             <div class="mb-3">
+                 <label for="name" class="form-label">Quiz Name <span class="text-danger">*</span></label>
+                 <input type="text" class="form-control" id="name" name="name" value="{{ request.form.name or quiz.name }}" required>
+             </div>
+             <div class="row">
+                  <div class="col-md-6 mb-3">
+                     <label for="date_of_quiz" class="form-label">Date of Quiz <span class="text-danger">*</span></label>
+                     {# Use quiz.date_of_quiz_str passed from route for correct format #}
+                     <input type="date" class="form-control" id="date_of_quiz" name="date_of_quiz" value="{{ request.form.date_of_quiz or quiz.date_of_quiz_str }}" required>
+                 </div>
+                 <div class="col-md-6 mb-3">
+                      <label for="time_duration" class="form-label">Time Duration (MM:SS) <span class="text-danger">*</span></label>
+                       {# Use text input with pattern; browser validation helps slightly #}
+                       <input type="text" class="form-control" id="time_duration" name="time_duration" placeholder="e.g., 30:00" pattern="\d{2}:\d{2}" value="{{ request.form.time_duration or quiz.time_duration }}" required>
+                       <div class="form-text">Enter duration in minutes:seconds (e.g., 30:00).</div>
+                  </div>
+             </div>
+             <div class="mb-3">
+                 <label for="remarks" class="form-label">Remarks (Optional)</label>
+                 <textarea class="form-control" id="remarks" name="remarks" rows="2">{{ request.form.remarks or quiz.remarks or '' }}</textarea>
+             </div>
+             <hr>
+              <a href="{{ url_for('quizzes_list') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+             <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Save Changes</button>
+         </form>
+    </div>
+</div>
+{% endblock %}

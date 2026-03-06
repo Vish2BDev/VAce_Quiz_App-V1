@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Edit Subject{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-pencil-square"></i> Edit Subject: {{ subject.name }}</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+         <form method="POST" action="{{ url_for('subject_edit', subject_id=subject.id) }}">
+            <div class="mb-3">
+                <label for="name" class="form-label">Subject Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ request.form.name or subject.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description (Optional)</label>
+                <textarea class="form-control" id="description" name="description" rows="4">{{ request.form.description or subject.description or '' }}</textarea>
+            </div>
+            <hr>
+             <a href="{{ url_for('subjects_list') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

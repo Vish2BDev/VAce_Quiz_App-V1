@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Edit Question (ID: {{ question.id }}){% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-pencil-square"></i> Edit Question</h1>
+ <h5 class="text-muted mb-4">For Quiz: <a href="{{ url_for('quiz_edit', quiz_id=quiz.id) }}">{{ quiz.name }}</a></h5>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('question_edit', question_id=question.id) }}" id="question-form">
+            {# Question Statement #}
+            <div class="mb-3">
+                <label for="question_statement" class="form-label">Question Statement <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="question_statement" name="question_statement" rows="3" required>{{ request.form.question_statement or question.question_statement }}</textarea>
+            </div>
+            <hr>
+
+            {# Dynamic Options #}
+            <h5 class="mb-3">Options <span class="text-danger">*</span> <small class="text-muted">(Mark one as correct)</small></h5>
+            <div id="options-container">
+                {# Loop through existing options to render them #}
+                {% for option in question.options %}
+                <div class="input-group mb-3 option-row">
+                     <div class="input-group-text">
+                        {# Value is index, check if this option is correct #}
+                        <input class="form-check-input mt-0" type="radio" value="{{ loop.index0 }}" name="correct_option" aria-label="Mark as correct" required title="Mark as correct" {% if option.is_correct %}checked{% endif %}>
+                    </div>
+                    <input type="text" name="option_text[]" class="form-control" placeholder="Option Text" aria-label="Option text" required value="{{ option.option_text }}">
+                    <button class="btn btn-outline-danger remove-option-btn" type="button" title="Remove Option"><i class="bi bi-x-lg"></i></button>
+                </div>
+                {% else %}
+                 {# Fallback if somehow a question has no options (shouldn't happen with validation) #}
+                  <div class="input-group mb-3 option-row">
+                     <div class="input-group-text">
+                        <input class="form-check-input mt-0" type="radio" value="0" name="correct_option" aria-label="Mark as correct" required title="Mark as correct">
+                    </div>
+                    <input type="text" name="option_text[]" class="form-control" placeholder="Option Text" aria-label="Option text" required>
+                    <button class="btn btn-outline-danger remove-option-btn" type="button" title="Remove Option"><i class="bi bi-x-lg"></i></button>
+                </div>
+                 <div class="input-group mb-3 option-row">
+                     <div class="input-group-text">
+                        <input class="form-check-input mt-0" type="radio" value="1" name="correct_option" aria-label="Mark as correct" required title="Mark as correct">
+                    </div>
+                    <input type="text" name="option_text[]" class="form-control" placeholder="Option Text" aria-label="Option text" required>
+                    <button class="btn btn-outline-danger remove-option-btn" type="button" title="Remove Option"><i class="bi bi-x-lg"></i></button>
+                </div>
+                {% endfor %}
+                 {# JS will add more rows here #}
+            </div>
+             <button type="button" class="btn btn-sm btn-outline-success mb-3" id="add-option-btn"><i class="bi bi-plus-circle"></i> Add Option</button>
+
+            <hr>
+            <a href="{{ url_for('questions_list', quiz_id=quiz.id) }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Save Changes</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{# Use the same script as admin_create_question.html #}
+{% block scripts %}
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const optionsContainer = document.getElementById('options-container');
+        const addOptionBtn = document.getElementById('add-option-btn');
+
+        // Function to update radio button values (indices)
+        function updateOptionIndices() {
+            const optionRows = optionsContainer.querySelectorAll('.option-row');
+            optionRows.forEach((row, index) => {
+                const radio = row.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.value = index;
+                }
+                // Update remove button visibility (optional: keep at least 2 options)
+                const removeBtn = row.querySelector('.remove-option-btn');
+                 if (removeBtn) {
+                     removeBtn.style.display = optionRows.length > 2 ? 'block' : 'none';
+                 }
+            });
+        }
+
+        // Add Option Button Handler
+        addOptionBtn.addEventListener('click', function() {
+            const optionRows = optionsContainer.querySelectorAll('.option-row');
+            if (optionRows.length === 0) return; // Should not happen with default rows
+
+            // Find a template row to clone (use the first one)
+             let templateRow = optionRows[0];
+             // Alternatively, define a hidden template row elsewhere in the HTML
+
+            const newRow = templateRow.cloneNode(true); // Clone the first row
+            const inputs = newRow.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.type === 'text') {
+                    input.value = ''; // Clear text
+                } else if (input.type === 'radio') {
+                    input.checked = false; // Uncheck radio
+                }
+             });
+             optionsContainer.appendChild(newRow);
+             updateOptionIndices();
+        });
+
+        // Remove Option Button Handler (using event delegation)
+        optionsContainer.addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-option-btn') || event.target.closest('.remove-option-btn')) {
+                 const optionRows = optionsContainer.querySelectorAll('.option-row');
+                 if (optionRows.length > 2) { // Prevent removing below 2 options
+                    event.target.closest('.option-row').remove();
+                    updateOptionIndices();
+                } else {
+                     alert('A question must have at least two options.');
+                 }
+            }
+        });
+
+         // Initial setup
+         updateOptionIndices(); // Set initial indices and button visibility
+    });
+</script>
+{% endblock %}

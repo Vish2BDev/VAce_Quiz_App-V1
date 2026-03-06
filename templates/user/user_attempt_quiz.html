@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Attempt Quiz: {{ quiz.name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-2"><i class="bi bi-pencil-fill"></i> {{ quiz.name }}</h1>
+<p class="text-muted mb-1">Chapter: {{ quiz.chapter.name }} ({{ quiz.chapter.subject.name }})</p>
+<p class="text-muted mb-3">Duration: {{ quiz.time_duration }} mins | Total Questions: {{ questions|length }}</p>
+{% if quiz.remarks %}
+<div class="alert alert-info alert-sm py-2">{{ quiz.remarks }}</div>
+{% endif %}
+<hr>
+
+{% if questions %}
+    <form method="POST" action="{{ url_for('attempt_quiz', quiz_id=quiz.id) }}">
+        {% for question in questions %}
+        <div class="card mb-4 shadow-sm question-card">
+            <div class="card-header">
+                <strong>Question {{ loop.index }} of {{ loop.length }}</strong>
+            </div>
+            <div class="card-body">
+                <p class="card-text fs-5 mb-3">{{ question.question_statement }}</p>
+                <div class="options-list">
+                    {% for option in question.options %}
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="option_{{ option.id }}" value="{{ option.id }}" required>
+                        <label class="form-check-label" for="option_{{ option.id }}">
+                            {{ option.option_text }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="d-grid gap-2 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg" onclick="return confirm('Are you sure you want to submit your answers?');">
+               <i class="bi bi-check-circle-fill"></i> Submit Answers
+            </button>
+             <a href="{{ url_for('dashboard_user') }}" class="btn btn-outline-secondary">Cancel and Go Back</a>
+        </div>
+    </form>
+{% else %}
+    <div class="alert alert-warning">This quiz currently has no questions. Please contact an administrator.</div>
+     <a href="{{ url_for('dashboard_user') }}" class="btn btn-secondary">Back to Dashboard</a>
+{% endif %}
+
+{% endblock %}
+

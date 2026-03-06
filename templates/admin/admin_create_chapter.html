@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Add New Chapter{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-collection-fill"></i> Add New Chapter</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+         {# Form posts to the dedicated admin_create_chapter route #}
+         <form method="POST" action="{{ url_for('admin_create_chapter') }}">
+             <div class="mb-3">
+                <label for="subject_id" class="form-label">Subject <span class="text-danger">*</span></label>
+                <select class="form-select" id="subject_id" name="subject_id" required>
+                    <option value="">-- Select Subject --</option>
+                    {% for subject in subjects %}
+                         {# --- CORRECTED LINE --- #}
+                         {# Get submitted subject_id safely (will be None if not present) #}
+                         {% set submitted_subject_id = request.form.get('subject_id') %}
+                         <option value="{{ subject.id }}"
+                                 {# Check if current subject matches preselected ID (from GET) OR submitted ID (from POST error) #}
+                                 {% if subject.id == preselected_subject_id or (submitted_subject_id and subject.id == (submitted_subject_id | int(0))) %}selected{% endif %}>
+                            {{ subject.name }}
+                         </option>
+                         {# --- END CORRECTED LINE --- #}
+                    {% endfor %}
+                </select>
+             </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Chapter Name <span class="text-danger">*</span></label>
+                {# Retain value if passed back on error, otherwise empty #}
+                <input type="text" class="form-control" id="name" name="name" value="{{ chapter_name or request.form.name or '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description (Optional)</label>
+                {# Retain value if passed back on error, otherwise empty #}
+                <textarea class="form-control" id="description" name="description" rows="3">{{ description or request.form.description or '' }}</textarea>
+            </div>
+            <hr>
+            <a href="{{ url_for('chapters_list') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Create Chapter</button>
+        </form>
+    </div>
+</div>
+
+{# Show warning if no subjects exist to select from #}
+{% if not subjects %}
+ <div class="alert alert-warning mt-3" role="alert">
+   No subjects found. You must <a href="{{ url_for('admin_create_subject') }}">create a subject</a> before adding chapters.
+ </div>
+{% endif %}
+
+{% endblock %}

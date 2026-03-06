@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Admin Analytics{% endblock %}
+
+{% block head_extra %}
+    {# Chart.js CDN #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-bar-chart-line-fill"></i> Admin Analytics</h1>
+<hr>
+
+<div class="container my-4">
+  <!-- Optional Summary Cards (Top Section) -->
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Users</h5>
+          <p class="card-text fs-4">{{ total_users }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Quizzes</h5>
+          <p class="card-text fs-4">{{ total_quizzes }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Subjects</h5>
+          <p class="card-text fs-4">{{ total_subjects }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Active Chapters</h5>
+          <p class="card-text fs-4">{{ total_chapters }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row with two side-by-side charts -->
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <h5>User Growth Over Time</h5>
+      <canvas id="userGrowthChart" width="400" height="200"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+      <h5>Quiz Attempts Trend</h5>
+      <canvas id="quizAttemptChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Row with two more charts (pie/donut + horizontal bar) -->
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <h5>Quizzes by Subject</h5>
+      <canvas id="subjectQuizChart" width="400" height="200"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+      <h5>Active Chapters Distribution</h5>
+      <canvas id="chapterDistribution" width="400" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+{# Chart.js is already loaded via head_extra above — do NOT re-import it here #}
+// We'll receive data as arrays from the route
+// Use Jinja2 to pass them in safely in JSON form
+
+// 1) userGrowthChart data
+const userGrowthLabels = {{ userGrowth_labels|tojson }};
+const userGrowthValues = {{ userGrowth_values|tojson }};
+// 2) quizAttemptChart data
+const quizAttemptLabels = {{ quizAttempt_labels|tojson }};
+const quizAttemptValues = {{ quizAttempt_values|tojson }};
+// 3) subjectQuizChart data
+const subjectQuizLabels = {{ quizBySubject_labels|tojson }};
+const subjectQuizValues = {{ quizBySubject_values|tojson }};
+// 4) chapterDistribution data
+const chapterDistLabels = {{ chapterDist_labels|tojson }};
+const chapterDistValues = {{ chapterDist_values|tojson }};
+
+////////////////////////
+// 1) User Growth (Line)
+////////////////////////
+const userCtx = document.getElementById('userGrowthChart').getContext('2d');
+new Chart(userCtx, {
+  type: 'line',
+  data: {
+    labels: userGrowthLabels,
+    datasets: [{
+      label: 'User Signups',
+      data: userGrowthValues,
+      borderColor: 'rgba(75,192,192,1)',
+      backgroundColor: 'rgba(75,192,192,0.4)',
+      borderWidth: 2,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top'
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Month'
+        }
+      },
+      y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Signups'
+        },
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+////////////////////////
+// 2) Quiz Attempts (Bar)
+////////////////////////
+const quizCtx = document.getElementById('quizAttemptChart').getContext('2d');
+new Chart(quizCtx, {
+  type: 'bar',
+  data: {
+    labels: quizAttemptLabels,
+    datasets: [{
+      label: 'Quiz Attempts',
+      data: quizAttemptValues,
+      backgroundColor: 'rgba(255, 159, 64, 0.6)'
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+///////////////////////////////
+// 3) Quizzes by Subject (Pie)
+///////////////////////////////
+const subCtx = document.getElementById('subjectQuizChart').getContext('2d');
+new Chart(subCtx, {
+  type: 'doughnut', // or 'pie'
+  data: {
+    labels: subjectQuizLabels,
+    datasets: [{
+      label: 'Quizzes by Subject',
+      data: subjectQuizValues,
+      backgroundColor: [
+        'rgba(54,162,235,0.6)',
+        'rgba(255,99,132,0.6)',
+        'rgba(255,206,86,0.6)',
+        'rgba(75,192,192,0.6)',
+        'rgba(153,102,255,0.6)'
+        // add more colors if needed
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top'
+      }
+    }
+  }
+});
+
+/////////////////////////////////////////
+// 4) Active Chapters Distribution (Bar)
+/////////////////////////////////////////
+const chapCtx = document.getElementById('chapterDistribution').getContext('2d');
+new Chart(chapCtx, {
+  type: 'bar', // or 'horizontalBar' if using older Chart.js. In v3, you can use axis: 'y'.
+  data: {
+    labels: chapterDistLabels,
+    datasets: [{
+      label: 'Active Chapters',
+      data: chapterDistValues,
+      backgroundColor: 'rgba(153, 102, 255, 0.6)'
+    }]
+  },
+  options: {
+    indexAxis: 'y', // This makes it horizontal in Chart.js v3+
+    responsive: true,
+    scales: {
+      x: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
+
+{% endblock %}

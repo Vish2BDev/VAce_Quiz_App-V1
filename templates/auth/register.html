@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Register - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-5">
+             <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4"><i class="bi bi-person-plus-fill"></i> Register New Account</h2>
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="username" name="username" required value="{{ request.form.username or '' }}">
+                    </div>
+                     <div class="mb-3">
+                        <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required value="{{ request.form.full_name or '' }}">
+                    </div>
+                     <div class="mb-3">
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div id="passwordHelpBlock" class="form-text">
+                          Choose a strong password.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="qualification" class="form-label">Qualification (Optional)</label>
+                        <input type="text" class="form-control" id="qualification" name="qualification" value="{{ request.form.qualification or '' }}">
+                    </div>
+                    <div class="mb-4">
+                        <label for="dob" class="form-label">Date of Birth (Optional)</label>
+                        <input type="date" class="form-control" id="dob" name="dob" value="{{ request.form.dob or '' }}">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-block"><i class="bi bi-check-circle-fill"></i> Register</button>
+                    </div>
+                </form>
+                 <hr>
+                <div class="text-center">
+                    <p class="mb-0">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

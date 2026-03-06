@@ -1,0 +1,36 @@
+# Secrets — NEVER commit these
+.env
+*.env
+.env.local
+
+# SQLite dev DB — keep out of version control
+quiz_master.db
+*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Vercel
+.vercel/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+.vercel

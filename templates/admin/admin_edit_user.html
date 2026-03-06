@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-person-gear"></i> Edit User: {{ user.username }}</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+         <form method="POST" action="{{ url_for('admin_edit_user', user_id=user.id) }}">
+             <div class="row">
+                  <div class="col-md-6 mb-3">
+                     <label for="username" class="form-label">Username</label>
+                     <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" disabled readonly>
+                     <div class="form-text">Username cannot be changed.</div>
+                 </div>
+                 <div class="col-md-6 mb-3">
+                     <label for="password" class="form-label">New Password (Optional)</label>
+                     <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp">
+                      <div id="passwordHelp" class="form-text">Leave blank to keep the current password.</div>
+                 </div>
+             </div>
+              <div class="row">
+                 <div class="col-md-6 mb-3">
+                     <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                     <input type="text" class="form-control" id="full_name" name="full_name" value="{{ request.form.full_name or user.full_name }}" required>
+                 </div>
+                  <div class="col-md-6 mb-3">
+                     <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                     <select class="form-select" id="role" name="role" required>
+                         <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                          {# Add check to prevent changing last admin? Backend handles this #}
+                         <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                     </select>
+                 </div>
+             </div>
+              <div class="row">
+                 <div class="col-md-6 mb-3">
+                     <label for="qualification" class="form-label">Qualification (Optional)</label>
+                     <input type="text" class="form-control" id="qualification" name="qualification" value="{{ request.form.qualification or user.qualification or '' }}">
+                 </div>
+                 <div class="col-md-6 mb-3">
+                     <label for="dob" class="form-label">Date of Birth (Optional)</label>
+                     {# Use user.dob_str passed from route #}
+                     <input type="date" class="form-control" id="dob" name="dob" value="{{ request.form.dob or user.dob_str }}">
+                 </div>
+             </div>
+
+            <hr>
+             <a href="{{ url_for('admin_users') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

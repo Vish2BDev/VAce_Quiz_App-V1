@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Create New User{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-person-plus-fill"></i> Create New User</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('admin_create_user') }}">
+             <div class="row">
+                 <div class="col-md-6 mb-3">
+                     <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                     <input type="text" class="form-control" id="username" name="username" required value="{{ username or '' }}">
+                 </div>
+                  <div class="col-md-6 mb-3">
+                     <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                     <input type="password" class="form-control" id="password" name="password" required>
+                 </div>
+             </div>
+             <div class="row">
+                 <div class="col-md-6 mb-3">
+                     <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                     <input type="text" class="form-control" id="full_name" name="full_name" required value="{{ full_name or '' }}">
+                 </div>
+                  <div class="col-md-6 mb-3">
+                     <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                     <select class="form-select" id="role" name="role" required>
+                         <option value="user" {% if not role or role == 'user' %}selected{% endif %}>User</option>
+                         <option value="admin" {% if role == 'admin' %}selected{% endif %}>Admin</option>
+                     </select>
+                 </div>
+             </div>
+             <div class="row">
+                 <div class="col-md-6 mb-3">
+                     <label for="qualification" class="form-label">Qualification (Optional)</label>
+                     <input type="text" class="form-control" id="qualification" name="qualification" value="{{ qualification or '' }}">
+                 </div>
+                 <div class="col-md-6 mb-3">
+                     <label for="dob" class="form-label">Date of Birth (Optional)</label>
+                     <input type="date" class="form-control" id="dob" name="dob" value="{{ dob or '' }}">
+                 </div>
+             </div>
+
+            <hr>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Create User</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

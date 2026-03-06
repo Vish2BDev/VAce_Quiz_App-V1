@@ -1,0 +1,75 @@
+{% extends "base.html" %} {# Assumes base.html exists #}
+{% block title %}Create Question for {{ quiz.name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-patch-plus-fill"></i> Create New Question</h1>
+<h5 class="text-muted mb-4">For Quiz: {{ quiz.name }} ({{ quiz.chapter.subject.name }})</h5>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {# Form posts to the create_question route for this specific quiz_id #}
+        <form method="POST" action="{{ url_for('create_question', quiz_id=quiz.id) }}" id="question-form">
+
+            {# Question Statement Input #}
+            <div class="mb-3">
+                <label for="question_statement" class="form-label">Question Statement <span class="text-danger">*</span></label>
+                <textarea class="form-control"
+                          id="question_statement"
+                          name="question_statement"
+                          rows="3"
+                          required>{{ request.form.question_statement or '' }}</textarea> {# Retain value on error #}
+            </div>
+            <hr>
+
+            {# Options Section #}
+            <h5 class="mb-3">Options <span class="text-danger">*</span></h5>
+            <p class="text-muted form-text">
+                Enter the text for each option below. Fill in at least two options. Mark the radio button next to the correct answer. Leave unused fields blank. (Max 4 options)
+            </p>
+
+            <div id="options-container">
+                {# --- MODIFIED: Render exactly 4 fixed slots for options --- #}
+                {% set submitted_options = request.form.getlist('option_text[]') %}
+                {% set submitted_correct_index = request.form.get('correct_option') %}
+                {% for i in range(4) %} {# Loop to create 4 option input groups #}
+                    <div class="input-group mb-3 option-row">
+                        {# Radio button to select the correct option #}
+                        <div class="input-group-text">
+                            <input class="form-check-input mt-0"
+                                   type="radio"
+                                   value="{{ i }}" {# Value is the index (0-3) #}
+                                   name="correct_option" {# All radios share the same name #}
+                                   aria-label="Mark option {{ i+1 }} as correct"
+                                   title="Mark option {{ i+1 }} as correct"
+                                   {% if loop.first %}required{% endif %} {# Require one radio selection #}
+                                   {# Check if this index was submitted previously on error #}
+                                   {% if submitted_correct_index is not none and submitted_correct_index == i|string %}checked{% endif %}>
+                        </div>
+                        {# Text input for the option #}
+                        <input type="text"
+                               name="option_text[]" {# Name indicates it's part of a list #}
+                               class="form-control"
+                               placeholder="Option {{ i+1 }} Text"
+                               aria-label="Option text for option {{ i+1 }}"
+                               {# Retain submitted value for this specific index on error #}
+                               value="{{ submitted_options[i] if submitted_options and i < submitted_options|length else '' }}">
+                    </div>
+                {% endfor %}
+                {# --- END MODIFICATION --- #}
+            </div> {# End options-container #}
+
+            <hr>
+
+            {# Action Buttons #}
+            <a href="{{ url_for('questions_list', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                <i class="bi bi-x-lg"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg"></i> Create Question
+            </button>
+
+        </form> {# End Form #}
+    </div> {# End card-body #}
+</div> {# End card #}
+
+{% endblock %} {# End content #}
